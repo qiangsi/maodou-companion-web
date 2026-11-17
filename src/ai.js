@@ -59,12 +59,14 @@ export async function diagnoseAppCheck() {
 
 const ai = getAI(app, { backend: new GoogleAIBackend() });
 
-// Cloud fallback model: gemini-3.8-flash (stable, no billing required).
-// Note: gemini-2.5-flash is deprecated; from 2026-12-01 the Gemini Developer
-// API routes 2.5 Flash/Pro requests to newer models automatically.
+// Cloud fallback model: gemini-2.5-flash (stable, no billing required).
+// gemini-3.8-flash was tried first (2026-11-17): the model ID is real and
+// supported, but every generateContent call through the AI Logic gateway
+// timed out with 503 "Deadline expired" (3-5 min each, all four features).
+// 2.5-flash is the verified fallback. Do not switch back without re-testing.
 export const model = getGenerativeModel(ai, {
   mode: InferenceMode.PREFER_ON_DEVICE,
-  inCloudParams: { model: "gemini-3.8-flash" },
+  inCloudParams: { model: "gemini-2.5-flash" },
 });
 
 let deviceInitStarted = false;
