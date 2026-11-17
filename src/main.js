@@ -1,4 +1,4 @@
-import { initDeviceModel, isOnDeviceAvailable, generate, generateJSON } from "./ai.js";
+import { initDeviceModel, isOnDeviceAvailable, generate, generateJSON, diagnoseAppCheck } from "./ai.js";
 import { checkinPrompt, taskPrompt, praisePrompt, readPrompt, briefPrompt } from "./prompts.js";
 
 const I18N = {
@@ -239,3 +239,16 @@ $("goBrief").onclick = async () => {
 };
 
 applyLang();
+
+// TEMPORARY diagnostic for the 401 investigation — remove before submission.
+// Shows the App Check token-fetch result on the page so it can be read
+// without DevTools.
+setTimeout(async () => {
+  const el = $("initStatus");
+  try {
+    const d = await diagnoseAppCheck();
+    el.textContent = "AppCheck诊断: " + JSON.stringify(d);
+  } catch (err) {
+    el.textContent = "AppCheck诊断失败: " + String(err?.message || err);
+  }
+}, 3000);

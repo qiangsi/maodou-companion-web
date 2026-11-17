@@ -3,7 +3,7 @@
 // cloud model falls back automatically via InferenceMode.PREFER_ON_DEVICE.
 // Docs: https://firebase.google.com/docs/ai-logic/hybrid-on-device-inference
 import { initializeApp } from "firebase/app";
-import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider, getToken } from "firebase/app-check";
 import {
   getAI,
   getGenerativeModel,
@@ -36,10 +36,26 @@ if (
 ) {
   self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 }
-initializeAppCheck(app, {
+const appCheck = initializeAppCheck(app, {
   provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_SITE_KEY),
   isTokenAutoRefreshEnabled: true,
 });
+
+/** TEMPORARY diagnostic for the 401 investigation — remove before submission.
+ * Forces a fresh App Check token fetch and reports whether the reCAPTCHA
+ * script loaded and what getToken() returned. */
+export async function diagnoseAppCheck() {
+  const info = {
+    grecaptcha: typeof window.grecaptcha,
+    enterprise: typeof window.grecaptcha?.enterprise,
+  };
+  try {
+    const t = await getToken(appCheck, true);
+    return { ...info, ok: true, tokenPrefix: t.token.slice(0, 12) };
+  } catch (err) {
+    return { ...info, ok: false, error: String(err?.message || err) };
+  }
+}
 
 const ai = getAI(app, { backend: new GoogleAIBackend() });
 
