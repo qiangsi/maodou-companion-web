@@ -3,7 +3,7 @@
 // cloud model falls back automatically via InferenceMode.PREFER_ON_DEVICE.
 // Docs: https://firebase.google.com/docs/ai-logic/hybrid-on-device-inference
 import { initializeApp } from "firebase/app";
-import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 import {
   getAI,
   getGenerativeModel,
@@ -17,9 +17,14 @@ const app = initializeApp(firebaseConfig);
 // App Check needs a provider object: initializeAppCheck throws without one
 // ("Cannot read properties of undefined (reading 'initialize')"), which
 // kills this whole module and leaves every button on the page dead.
-// Production provider: reCAPTCHA v3 (free), site key created 2026-11-17 for
-// maodou-companion.web.app / maodou-companion.firebaseapp.com / localhost.
-const RECAPTCHA_SITE_KEY = "6Le12iQuAAAAAEg-vuUecUuPmgwIsh2rSpEjhV3k";
+// Production provider: reCAPTCHA Enterprise (Fraud Defense, free tier),
+// site key created 2026-11-17 for maodou-companion.web.app /
+// maodou-companion.firebaseapp.com / localhost. The Classic reCAPTCHA v3
+// key (6Le12iQu...) can no longer be registered: Firebase console disabled
+// its form on 2026-11-17 ("reCAPTCHA Classic 已弃用"), so the app was
+// re-registered with Enterprise and the client switched providers the
+// same day. Do not switch back to ReCaptchaV3Provider.
+const RECAPTCHA_SITE_KEY = "6LdpEyQuAAAAADdEAPnXEwBWTBOm5Faw8Oqb8OHv";
 
 // Debug provider only for local development: the console prints a debug
 // token on first run; register it under Firebase console > App Check > Apps
@@ -32,7 +37,7 @@ if (
   self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 }
 initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),
+  provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_SITE_KEY),
   isTokenAutoRefreshEnabled: true,
 });
 
