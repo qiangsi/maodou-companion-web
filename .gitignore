@@ -1,0 +1,8 @@
+node_modules
+dist
+.env
+.env.*
+*.local
+# Firebase web config holds the project's client key: kept out of the repo.
+# Create it from your own Firebase project (see README).
+src/firebase-config.js

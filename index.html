@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maodou Companion · 毛豆陪伴</title>
+    <style>
+      :root { --green: #4c9a6a; --warm: #fff8ec; --ink: #2b2b2b; --muted: #777; }
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--warm); color: var(--ink); }
+      header { padding: 20px 24px 8px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+      h1 { font-size: 22px; margin: 0; }
+      h1 small { display: block; font-size: 13px; color: var(--muted); font-weight: 400; margin-top: 4px; }
+      .badge { font-size: 12px; border: 1px solid #ccc; border-radius: 999px; padding: 4px 10px; background: #fff; }
+      .badge.on-device { border-color: var(--green); color: var(--green); }
+      .badge.cloud { border-color: #b07d2b; color: #b07d2b; }
+      main { max-width: 720px; margin: 0 auto; padding: 8px 16px 48px; }
+      .card { background: #fff; border-radius: 14px; padding: 18px; margin-top: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+      .card h2 { font-size: 17px; margin: 0 0 6px; }
+      .card p.hint { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; }
+      .faces { display: flex; gap: 8px; margin: 6px 0 10px; }
+      .faces button { font-size: 26px; padding: 8px 14px; border-radius: 12px; border: 2px solid #eee; background: #fff; cursor: pointer; }
+      .faces button.sel { border-color: var(--green); background: #eef7f0; }
+      input[type="text"], textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; font-family: inherit; }
+      textarea { min-height: 64px; resize: vertical; }
+      button.go { background: var(--green); color: #fff; border: none; border-radius: 10px; padding: 10px 18px; font-size: 15px; cursor: pointer; }
+      button.go:disabled { opacity: .5; cursor: wait; }
+      button.ghost { background: #fff; border: 1px solid #ccc; border-radius: 10px; padding: 8px 14px; font-size: 14px; cursor: pointer; }
+      .out { margin-top: 12px; padding: 12px; background: #f6fbf7; border-radius: 10px; white-space: pre-wrap; line-height: 1.6; }
+      .out:empty { display: none; }
+      .meta { font-size: 12px; color: var(--muted); margin-top: 8px; }
+      .lang { font-size: 13px; }
+      .lang button { border: none; background: none; cursor: pointer; color: var(--muted); font-size: 13px; }
+      .lang button.sel { color: var(--ink); font-weight: 700; }
+      footer { text-align: center; color: var(--muted); font-size: 12px; padding: 0 16px 24px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>🌱 <span data-i18n="appName">毛豆陪伴</span><small data-i18n="tagline">每天 10 分钟，先接住，再一起往前走</small></h1>
+      <div>
+        <span class="lang"><button id="langZh" class="sel">中文</button> | <button id="langEn">EN</button></span>
+        <span id="modeBadge" class="badge">…</span>
+      </div>
+    </header>
+    <main>
+      <div class="card">
+        <h2 data-i18n="profileTitle">今天的孩子</h2>
+        <p class="hint" data-i18n="profileHint">只存在这台设备上，不会上传。</p>
+        <div class="row">
+          <input id="childName" type="text" style="flex:1" data-i18n-ph="namePh" placeholder="孩子的小名" />
+          <input id="childAge" type="text" style="width:90px" data-i18n-ph="agePh" placeholder="年龄" />
+          <select id="childGrade" style="width:130px">
+            <option value="1">一年级</option><option value="2">二年级</option>
+            <option value="3">三年级</option><option value="4" selected>四年级</option>
+            <option value="5">五年级</option><option value="6">六年级</option>
+          </select>
+        </div>
+        <div style="margin-top:10px"><button id="initModel" class="go" data-i18n="startBtn">开始今天的陪伴</button></div>
+        <div id="initStatus" class="meta"></div>
+      </div>
+
+      <div class="card" id="stepCheckin">
+        <h2 data-i18n="s1Title">1 · 情绪打卡</h2>
+        <p class="hint" data-i18n="s1Hint">选一个表情，再用一句话说说今天怎么样。只记录，不评判。</p>
+        <div class="faces" id="faces">
+          <button data-face="😊">😊</button>
+          <button data-face="😐">😐</button>
+          <button data-face="😔">😔</button>
+        </div>
+        <textarea id="moodText" data-i18n-ph="s1Ph" placeholder="今天……（一句话就好）"></textarea>
+        <div style="margin-top:10px"><button class="go" id="goCheckin" data-i18n="s1Btn">毛豆听我说</button></div>
+        <div class="out" id="outCheckin"></div>
+      </div>
+
+      <div class="card" id="stepTask">
+        <h2 data-i18n="s2Title">2 · 微任务</h2>
+        <p class="hint" data-i18n="s2Hint">一个 10 分钟就能完成的小任务，跳一下就能够到。</p>
+        <div style="margin-top:4px"><button class="go" id="goTask" data-i18n="s2Btn">给我一个小任务</button></div>
+        <div class="out" id="outTask"></div>
+        <div style="margin-top:10px"><button class="ghost" id="doneTask" data-i18n="s2Done">我完成了 ✓</button></div>
+        <div class="out" id="outPraise"></div>
+      </div>
+
+      <div class="card" id="stepRead">
+        <h2 data-i18n="s3Title">3 · 分级阅读</h2>
+        <p class="hint" data-i18n="s3Hint">读一点，聊三个开放问题，保护好奇心。</p>
+        <div style="margin-top:4px"><button class="go" id="goRead" data-i18n="s3Btn">今天读什么</button></div>
+        <div class="out" id="outRead"></div>
+      </div>
+
+      <div class="card" id="stepBrief">
+        <h2 data-i18n="s4Title">4 · 家长一句话简报</h2>
+        <p class="hint" data-i18n="s4Hint">只说今天的进步，不告状。</p>
+        <div style="margin-top:4px"><button class="go" id="goBrief" data-i18n="s4Btn">生成今天的简报</button></div>
+        <div class="out" id="outBrief"></div>
+      </div>
+    </main>
+    <footer>
+      <span data-i18n="footer">毛豆陪伴不做心理诊断，不替代专业心理咨询。出现风险信号时，请寻求专业人士帮助。</span><br />
+      <span data-i18n="footer2">Built with Firebase AI Logic · on-device Gemini Nano when available, cloud Gemini fallback otherwise.</span>
+    </footer>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
