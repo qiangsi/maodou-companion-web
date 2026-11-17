@@ -3,7 +3,7 @@
 // cloud model falls back automatically via InferenceMode.PREFER_ON_DEVICE.
 // Docs: https://firebase.google.com/docs/ai-logic/hybrid-on-device-inference
 import { initializeApp } from "firebase/app";
-import { initializeAppCheck } from "firebase/app-check";
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import {
   getAI,
   getGenerativeModel,
@@ -14,12 +14,22 @@ import { firebaseConfig } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
 
+// App Check needs a provider object: initializeAppCheck throws without one
+// ("Cannot read properties of undefined (reading 'initialize')"), which
+// kills this whole module and leaves every button on the page dead.
+// TODO: replace with the real reCAPTCHA v3 site key (being created) and
+// restrict the debug flag to localhost only.
+const RECAPTCHA_SITE_KEY = "placeholder-pending-real-key";
+
 // Debug provider for local development and for this hackathon submission
 // (the contest rules accept debug tokens). The console prints a debug token
 // on first run; register it under Firebase console > App Check > Apps >
 // Manage debug tokens.
 self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
-initializeAppCheck(app, { isTokenAutoRefreshEnabled: true });
+initializeAppCheck(app, {
+  provider: new ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),
+  isTokenAutoRefreshEnabled: true,
+});
 
 const ai = getAI(app, { backend: new GoogleAIBackend() });
 
