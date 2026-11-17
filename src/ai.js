@@ -17,15 +17,20 @@ const app = initializeApp(firebaseConfig);
 // App Check needs a provider object: initializeAppCheck throws without one
 // ("Cannot read properties of undefined (reading 'initialize')"), which
 // kills this whole module and leaves every button on the page dead.
-// TODO: replace with the real reCAPTCHA v3 site key (being created) and
-// restrict the debug flag to localhost only.
-const RECAPTCHA_SITE_KEY = "placeholder-pending-real-key";
+// Production provider: reCAPTCHA v3 (free), site key created 2026-11-17 for
+// maodou-companion.web.app / maodou-companion.firebaseapp.com / localhost.
+const RECAPTCHA_SITE_KEY = "6Le12iQuAAAAAEg-vuUecUuPmgwIsh2rSpEjhV3k";
 
-// Debug provider for local development and for this hackathon submission
-// (the contest rules accept debug tokens). The console prints a debug token
-// on first run; register it under Firebase console > App Check > Apps >
-// Manage debug tokens.
-self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+// Debug provider only for local development: the console prints a debug
+// token on first run; register it under Firebase console > App Check > Apps
+// > Manage debug tokens. Never enabled on the live site: every visitor's
+// browser would mint an unregistered token and App Check would reject it.
+if (
+  location.hostname === "localhost" ||
+  location.hostname === "127.0.0.1"
+) {
+  self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+}
 initializeAppCheck(app, {
   provider: new ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),
   isTokenAutoRefreshEnabled: true,
