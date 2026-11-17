@@ -59,15 +59,15 @@ export async function diagnoseAppCheck() {
 
 const ai = getAI(app, { backend: new GoogleAIBackend() });
 
-// Cloud fallback model: gemini-3.8-flash (stable, no billing required).
-// Model history (2026-11-17): 3.8-flash is the current model — the backend
-// itself recommends it. gemini-2.5-flash was tried as a fallback but returns
-// 404 "no longer available to new users". 3.8-flash calls timed out with 503
-// "Deadline expired" (3-5 min each) on 2026-11-17 evening; treated as
-// transient backend slowness, retry before changing anything.
+// Cloud fallback model: gemini-3.7-flash (stable, no billing required).
+// Model history (2026-11-17): gemini-3.8-flash is the current model, but
+// every generateContent call through the AI Logic gateway timed out with 503
+// "Deadline expired" (5 attempts over ~30 min, 2-5 min each). gemini-2.5-flash
+// returns 404 "no longer available to new users". 3.7-flash is the previous
+// GA Flash; trying it to see if the 503 is specific to 3.8-flash.
 export const model = getGenerativeModel(ai, {
   mode: InferenceMode.PREFER_ON_DEVICE,
-  inCloudParams: { model: "gemini-3.8-flash" },
+  inCloudParams: { model: "gemini-3.7-flash" },
 });
 
 let deviceInitStarted = false;
